@@ -16,13 +16,14 @@ class Game(object):
         else:
             self.board = board
 
-    def game_loop(self, starter):
+    def game_loop(self, starter, mode):
         print(self)
 
         current_player = starter
         while (not self.won(self.player1, self.board) and
                not self.won(self.player2, self.board) and
                not self.tied(self.board)):
+            print("{}'s turn:".format(current_player))
             if current_player == self.player1:
                 self.move(current_player, self.user_input(current_player))
             else:
@@ -36,6 +37,15 @@ class Game(object):
             else:
                 current_player = self.player1
 
+        if self.tied(self.board):
+            print("It's a tie!")
+
+        elif self.won(self.player1, self.board):
+            print("Player {} won".format(self.player1))
+
+        else:
+            print("Player {} won".format(self.player2))
+
         return
 
     def minimax(self, player, board):
@@ -43,12 +53,14 @@ class Game(object):
 
         if self.won(self.player1, board):
             return [None, -1]
+
         elif self.won(self.player2, board):
             return [None, 1]
+
         elif self.tied(board):
             return [None, 0]
-        else:
 
+        else:
             for pos, mark in board.items():
                 if mark == ' ':
                     move = [pos, None]
@@ -64,10 +76,6 @@ class Game(object):
 
                     moves.append(move)
 
-            # print(board)
-            # print("available moves for {}: ".format(player))
-            # print(moves)
-            # print('')
             if player == self.player1:
                 best_score = 2
 
@@ -75,6 +83,7 @@ class Game(object):
                     if move[1] < best_score:
                         best_score = move[1]
                         best_move = move
+
             else:
                 best_score = -2
 
@@ -83,17 +92,14 @@ class Game(object):
                         best_score = move[1]
                         best_move = move
 
-            # print("best move: ")
-            # print(best_move)
-            # print('')
             return best_move
 
     def move(self, player, pos):
-        # print("{} marked pos: {}".format(player, pos))
         if pos:
             self.board[pos] = player
-        else:
-            return
+            print("{} marked pos: {}".format(player, pos))
+
+        return
 
     # def move(self, player):
     #     print(self)
@@ -156,25 +162,29 @@ class Game(object):
         return True
 
     def user_input(self, player):
-        mark = input("Type where you want to mark as \"x,y\": ")
-        if (len(mark) == 3 and
-                mark[0].isdigit() and
-                mark[1] == "," and
-                mark[2].isdigit()):
-            mark = make_tuple(mark)
-        else:
-            print("Invalid input format, try again!")
-            return self.user_input(player)
+        while True:
+            pos = input("Type where you want to mark as \"x,y\": ")
 
-        if mark[0] not in self.range or mark[1] not in self.range:
-            print("Invalid position, try again!\n")
-            return self.user_input(player)
+            if (len(pos) == 3 and
+                    pos[0].isdigit() and
+                    pos[1] == "," and
+                    pos[2].isdigit()):
+                pos = make_tuple(pos)
+            else:
+                print("Invalid input format, try again!")
+                continue
 
-        if self.board[mark] != " ":
-            print("Can't mark here, try again!\n")
-            return self.user_input(player)
+            if pos[0] not in self.range or pos[1] not in self.range:
+                print("Invalid position, try again!\n")
+                continue
 
-        return mark
+            if self.board[pos] != " ":
+                print("Can't mark here, try again!\n")
+                continue
+
+            break
+
+        return pos
 
     def __str__(self):
         string = ''
@@ -200,4 +210,4 @@ if __name__ == "__main__":
     }
 
     game = Game(board)
-    game.game_loop('O')
+    game.game_loop('X', None)
